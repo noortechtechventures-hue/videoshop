@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#120E1C">
-<title>My Videos</title>
+<title>VillageFlix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
@@ -69,7 +69,6 @@ main{max-width:1180px;margin:0 auto;padding:0 16px 56px}
 .poster:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,0,0,.5)}
 .poster[hidden]{display:none}
 .art{position:absolute;inset:0;background-size:cover;background-position:center}
-.art.gen::before{content:"";position:absolute;left:50%;top:38%;width:34%;aspect-ratio:1;translate:-38% -50%;background:rgba(255,255,255,.26);clip-path:polygon(0 0,100% 50%,0 100%)}
 .poster::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(18,14,28,.95) 0,rgba(18,14,28,.5) 30%,rgba(18,14,28,0) 56%)}
 .poster .tt{position:absolute;top:10px;right:10px;z-index:2}
 .poster .kind{position:absolute;top:10px;left:10px;z-index:2;background:rgba(18,14,28,.72);font-size:.78rem;font-weight:600}
@@ -79,13 +78,32 @@ main{max-width:1180px;margin:0 auto;padding:0 16px 56px}
 .empty{padding:40px 16px;text-align:center;color:var(--muted)}
 .empty strong{display:block;font-family:var(--display);font-size:1.6rem;color:var(--text);margin-bottom:6px}
 
-/* generated cover styles */
-.c-gold{background:linear-gradient(160deg,#F4B942,#C2303A 62%,#2a1038)}
-.c-red{background:linear-gradient(160deg,#ff6b6b,#b3202c 55%,#2b0b1a)}
-.c-blue{background:linear-gradient(160deg,#4cc9f0,#3a2bc4 58%,#120e3a)}
-.c-green{background:linear-gradient(160deg,#7ee081,#0f7a56 58%,#06231c)}
-.c-violet{background:linear-gradient(160deg,#d38bff,#6a2fc0 56%,#1a0b36)}
-.c-sunset{background:linear-gradient(160deg,#ffd166,#ef476f 55%,#3b1255)}
+/* ---------- generated cover art (no picture needed) ---------- */
+.cv{position:relative;overflow:hidden;isolation:isolate;background-color:#120E1C}
+.art.cv{position:absolute;inset:0}
+.cv::before{content:"";position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(circle at 74% 24%,transparent 0 21%,rgba(255,255,255,.17) 21.4% 22.2%,transparent 22.6% 33%,rgba(255,255,255,.08) 33.3% 33.9%,transparent 34.3%),
+    linear-gradient(118deg,transparent 36%,rgba(255,255,255,.13) 48%,transparent 60%)}
+.cv::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:overlay;opacity:.65;background-size:160px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cv-title{position:absolute;left:14px;right:14px;bottom:42px;z-index:2;font-family:var(--display);font-weight:800;font-size:clamp(1.55rem,6.6vw,2.3rem);line-height:.95;color:#fff;text-wrap:balance;text-shadow:0 2px 18px rgba(0,0,0,.55)}
+.cv-title::before{content:"";display:block;width:30px;height:2px;background:var(--gold);margin-bottom:10px}
+.poster.gen::after{background:linear-gradient(0deg,rgba(0,0,0,.5) 0,rgba(0,0,0,0) 26%)}
+.poster.gen{box-shadow:0 10px 24px rgba(0,0,0,.35),inset 0 0 0 1px rgba(244,185,66,.28)}
+.poster.gen .cap h3{display:none}
+.poster.gen .cap{padding-top:0}
+.p0{background-image:radial-gradient(90% 60% at 82% 0%,#f9d27a,transparent 62%),radial-gradient(80% 70% at 0% 100%,#8a1c2b,transparent 64%),linear-gradient(165deg,#2b1b0c,#0b0710)}
+.p1{background-image:radial-gradient(90% 60% at 80% 0%,#4fd1e6,transparent 62%),radial-gradient(80% 70% at 5% 100%,#3b2bb8,transparent 64%),linear-gradient(165deg,#0b1b33,#070812)}
+.p2{background-image:radial-gradient(90% 60% at 80% 0%,#ff7a7a,transparent 62%),radial-gradient(80% 70% at 0% 100%,#7a0f26,transparent 64%),linear-gradient(165deg,#2a0b17,#0a0610)}
+.p3{background-image:radial-gradient(90% 60% at 80% 0%,#7bf0b4,transparent 62%),radial-gradient(80% 70% at 0% 100%,#0d6b52,transparent 64%),linear-gradient(165deg,#07241d,#050b0b)}
+.p4{background-image:radial-gradient(90% 60% at 80% 0%,#d9a0ff,transparent 62%),radial-gradient(80% 70% at 0% 100%,#5a22b8,transparent 64%),linear-gradient(165deg,#1d0f3a,#09050f)}
+.p5{background-image:radial-gradient(90% 60% at 80% 0%,#ffcf6b,transparent 60%),radial-gradient(80% 70% at 0% 100%,#d6336c,transparent 64%),linear-gradient(165deg,#3a1450,#0e0716)}
+.p6{background-image:radial-gradient(90% 60% at 80% 0%,#9fd8ff,transparent 62%),radial-gradient(80% 70% at 0% 100%,#0e7490,transparent 64%),linear-gradient(165deg,#062a3a,#04090e)}
+.p7{background-image:radial-gradient(90% 55% at 82% 0%,#e6c27a,transparent 60%),radial-gradient(80% 70% at 0% 100%,#3a3a4a,transparent 64%),linear-gradient(165deg,#15121c,#050408)}
+.wm{font-family:var(--display);font-weight:800;letter-spacing:.01em}
+.wm b{font-weight:800;color:var(--gold)}
+
 
 /* payment sheet */
 dialog{border:0;padding:0;background:transparent;color:var(--cream-ink);width:min(460px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;margin:auto}
@@ -116,7 +134,7 @@ dialog::backdrop{background:rgba(8,5,16,.78);backdrop-filter:blur(3px)}
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="mark"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg></span><span id="siteName">My Videos</span></div>
+  <div class="brand"><span class="mark"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg></span><span class="wm" id="siteName">Village<b>Flix</b></span></div>
 </header>
 
 <section class="hero" id="hero" hidden>
@@ -181,7 +199,7 @@ dialog::backdrop{background:rgba(8,5,16,.78);backdrop-filter:blur(3px)}
    EDIT THIS PART ONLY
    ===================================================================== */
 const SETTINGS = {
-  siteName: "My Videos",
+  siteName: "VillageFlix",
   till: "5196055",          // your till number (change to your brother's later)
   // WhatsApp numbers that receive the "I have paid" message, in this form: 254712345678
   // One button is shown per number. Leave the list empty to hide the buttons.
@@ -213,14 +231,17 @@ const VIDEOS = [
   var kindLabel = { movie: "Movie", series: "Series", video: "Video" };
   var current = null, kind = "all";
   document.title = SETTINGS.siteName;
-  $("siteName").textContent = SETTINGS.siteName;
 
-  function art(v, small) {
+  var PAL = { gold: 0, blue: 1, red: 2, green: 3, violet: 4, sunset: 5, ocean: 6, noir: 7 };
+  function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; }
+  function pal(v) { return (v.cover in PAL) ? PAL[v.cover] : hash(v.title) % 8; }
+  function art(v, bare) {
     var d = document.createElement("div");
     if (v.image) {
       d.className = "art"; d.style.backgroundImage = "url('" + encodeURI(v.image) + "')";
     } else {
-      d.className = "art gen c-" + (v.cover || "violet");
+      d.className = "art cv p" + pal(v);
+      if (!bare) { var t = document.createElement("span"); t.className = "cv-title"; t.textContent = v.title; d.appendChild(t); }
     }
     return d;
   }
@@ -231,7 +252,7 @@ const VIDEOS = [
     var f = VIDEOS.find(function (v) { return v.featured; }) || VIDEOS[0];
     $("hero").hidden = false;
     var bg = $("heroBg");
-    if (f.image) bg.style.backgroundImage = "url('" + encodeURI(f.image) + "')"; else bg.className = "bg c-" + (f.cover || "violet");
+    if (f.image) bg.style.backgroundImage = "url('" + encodeURI(f.image) + "')"; else bg.className = "bg cv p" + pal(f);
     $("heroTitle").textContent = f.title;
     $("heroKind").textContent = kindLabel[f.type] || "Video";
     $("heroSize").textContent = f.size || "";
@@ -245,7 +266,7 @@ const VIDEOS = [
     grid.replaceWith(Object.assign(el("div", "empty"), { innerHTML: "<strong>No videos yet</strong>New titles are coming. Check back soon." }));
   }
   VIDEOS.forEach(function (v) {
-    var b = el("button", "poster"); b.type = "button";
+    var b = el("button", "poster" + (v.image ? "" : " gen")); b.type = "button";
     b.dataset.kind = v.type; b.dataset.title = v.title.toLowerCase();
     b.setAttribute("aria-label", v.title + ", KSh " + v.price);
     b.appendChild(art(v));
@@ -278,7 +299,7 @@ const VIDEOS = [
   var sheet = $("sheet");
   function openSheet(v) {
     current = v;
-    var a = $("sArt"); a.replaceChildren(art(v));
+    var a = $("sArt"); a.replaceChildren(art(v, true));
     $("sTitle").textContent = v.title;
     $("sMeta").textContent = (kindLabel[v.type] || "Video") + (v.size ? " · " + v.size : "");
     $("sPrice").textContent = "KSh " + v.price;
