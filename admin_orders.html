@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block body %}
+<meta http-equiv="refresh" content="30">
+<h1>Payments</h1>
+<p class="muted">Compare each request with the M-Pesa SMS for till {{ till }}: same number, same amount. Then tap Approve.</p>
+
+<h2>Waiting for you ({{ pending|length }})</h2>
+{% if not pending %}<p class="muted">No pending requests. This page refreshes every 30 seconds.</p>{% endif %}
+{% for o in pending %}
+<div class="row">
+  <div>
+    <strong>{{ o.title }}</strong> · KSh {{ o.price }}<br>
+    <span class="muted">{{ o.phone|phone }}{% if o.name %} · {{ o.name }}{% endif %} · code {{ o.ref }} · {{ o.created|when }}</span>
+  </div>
+  <div class="actions">
+    <form method="post" action="{{ url_for('admin_order_action', oid=o.id, action='approve') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small">Approve</button>
+    </form>
+    <form method="post" action="{{ url_for('admin_order_action', oid=o.id, action='reject') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small ghost">Reject</button>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+<h2>Recent</h2>
+<p class="muted">Approved so far: KSh {{ total }}</p>
+{% for o in recent %}
+<div class="row">
+  <div><strong>{{ o.title }}</strong> · KSh {{ o.price }}<br>
+    <span class="muted">{{ o.phone|phone }} · {{ o.created|when }}</span></div>
+  <span class="tag {{ o.status }}">{{ o.status }}</span>
+</div>
+{% endfor %}
+{% endblock %}

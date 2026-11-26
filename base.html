@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#120E1C">
+<title>{% block title %}{{ site_name }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="{{ url_for('index') }}">
+    <span class="mark"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg></span>{{ site_name }}
+  </a>
+  {% if is_admin %}
+  <nav>
+    <a href="{{ url_for('admin_orders') }}">Payments</a>
+    <a href="{{ url_for('admin_videos') }}">Videos</a>
+    <form method="post" action="{{ url_for('admin_logout') }}" class="inline">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button class="link">Log out</button>
+    </form>
+  </nav>
+  {% endif %}
+</header>
+{% block hero %}{% endblock %}
+<main>
+  {% block flashes %}
+  {% with msgs = get_flashed_messages() %}
+    {% for m in msgs %}<div class="flash" role="status">{{ m }}</div>{% endfor %}
+  {% endwith %}
+  {% endblock %}
+  {% block body %}{% endblock %}
+</main>
+</body>
+</html>

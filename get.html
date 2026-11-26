@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ video.title }} · {{ site_name }}{% endblock %}
+{% block flashes %}{% endblock %}
+{% block body %}{% endblock %}
+{% block hero %}
+<section class="detail">
+  {% if video.thumb %}<div class="bg" style="background-image:url('{{ url_for('thumb', name=video.thumb) }}')"></div>{% endif %}
+  <div class="detail-in">
+    <div class="poster">
+      {% if video.thumb %}<img src="{{ url_for('thumb', name=video.thumb) }}" alt="">{% else %}<div class="noimg">{{ video.title[:1] }}</div>{% endif %}
+    </div>
+    <div>
+      <h1>{{ video.title }}</h1>
+      <div class="facts">
+        <span class="kind">{{ video.kind|capitalize }}</span>
+        <span>{{ video.size|size }}</span>
+        <span class="ticket-tag lg">KSh {{ video.price }}</span>
+      </div>
+      {% with msgs = get_flashed_messages() %}
+        {% for m in msgs %}<div class="flash" role="alert">{{ m }}</div>{% endfor %}
+      {% endwith %}
+      <form method="post">
+        <label>Your name (optional)
+          <input name="name" value="{{ name }}" maxlength="60" autocomplete="name">
+        </label>
+        <label>M-Pesa number you will pay from
+          <input name="phone" inputmode="tel" placeholder="0712 345 678" required autocomplete="tel">
+        </label>
+        <button class="btn full big">Get my download</button>
+      </form>
+      <ul class="how">
+        <li><b>1</b> Enter your number and see the till</li>
+        <li><b>2</b> Pay KSh {{ video.price }} on M-Pesa</li>
+        <li><b>3</b> Download once the seller confirms</li>
+      </ul>
+      <p><a href="{{ url_for('index') }}">Back to all titles</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

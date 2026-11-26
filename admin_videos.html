@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Videos</h1>
+<div class="panel">
+  <h2>Add a video</h2>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Title <input name="title" required maxlength="100"></label>
+    <div class="two">
+      <label>Type
+        <select name="kind">
+          <option value="movie">Movie</option>
+          <option value="series">Series</option>
+          <option value="video">Video</option>
+        </select>
+      </label>
+      <label>Price (KSh) <input name="price" type="number" min="1" required value="30"></label>
+    </div>
+    <label>Video file (up to {{ '%g'|format(max_gb) }} GB). For a series with many episodes, put them in one .zip
+      <input type="file" name="video" required>
+    </label>
+    <label>Thumbnail image (optional; one is made from the video if you skip it)
+      <input type="file" name="thumb" accept="image/*">
+    </label>
+    <button class="btn full">Upload</button>
+    <p class="muted">Large files take a while. Keep this page open until it finishes.</p>
+  </form>
+</div>
+
+<h2>On the site ({{ videos|length }})</h2>
+{% for v in videos %}
+<div class="row">
+  <div class="mini">
+    {% if v.thumb %}<img src="{{ url_for('thumb', name=v.thumb) }}" alt="">{% else %}<div class="noimg sm">{{ v.title[:1] }}</div>{% endif %}
+    <div><strong>{{ v.title }}</strong><br><span class="muted">{{ v.kind }} · KSh {{ v.price }} · {{ v.size|size }}</span></div>
+  </div>
+  <form method="post" action="{{ url_for('admin_video_delete', vid=v.id) }}"
+        onsubmit="return confirm('Delete {{ v.title|e }} for good?')">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small ghost">Delete</button>
+  </form>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ o.title }} · {{ site_name }}{% endblock %}
+{% block body %}
+<div class="pass bare">
+  <div class="pass-top">
+    {% if o.thumb %}<img src="{{ url_for('thumb', name=o.thumb) }}" alt="">{% else %}<div class="noimg">{{ o.title[:1] }}</div>{% endif %}
+    <div>
+      <h1>{{ o.title }}</h1>
+      <p class="muted">{{ o.kind|capitalize }} · {{ o.size|size }}</p>
+      <div class="price">KSh {{ o.price }}</div>
+    </div>
+  </div>
+
+  <div class="pass-bottom">
+  {% if state == 'approved' %}
+    <div class="stamp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Payment confirmed</div>
+    <a class="btn gold full big" href="{{ url_for('download', key=o.key) }}">Download ({{ o.size|size }})</a>
+    <p class="muted" style="color:#6b5f4c">Bookmark this page. The link works for {{ link_hours }} hours.</p>
+
+  {% elif state == 'rejected' %}
+    <p class="bad">We could not confirm this payment. If you paid, send the seller your M-Pesa message.</p>
+    <a class="btn full" href="{{ url_for('get_video', vid=o.video_id) }}">Try again</a>
+
+  {% elif state == 'expired' %}
+    <p class="bad">This download link has expired.</p>
+    <a class="btn full" href="{{ url_for('get_video', vid=o.video_id) }}">Request again</a>
+
+  {% else %}
+    <div class="pay-rows">
+      <div class="pay-row"><div><small>Till number</small><strong id="tillnum">{{ till }}</strong></div>
+        <button class="copy" type="button" data-copy="{{ till }}">Copy</button></div>
+      <div class="pay-row"><div><small>Amount</small><strong>KSh {{ o.price }}</strong></div>
+        <button class="copy" type="button" data-copy="{{ o.price }}">Copy</button></div>
+    </div>
+    <ol class="steps">
+      <li>Open M-Pesa, then Lipa na M-Pesa, then Buy Goods and Services</li>
+      <li>Enter the till number and the amount</li>
+      <li>Pay from <strong>{{ o.phone|phone }}</strong></li>
+    </ol>
+    <div class="wait" role="status"><span class="dot"></span><span>Waiting for the seller to confirm. This page updates by itself.</span></div>
+    <p class="muted" style="color:#6b5f4c;margin-top:10px">Your code: <strong>{{ o.ref }}</strong></p>
+    <script>
+      (function poll() {
+        fetch("{{ url_for('order_status', key=o.key) }}", {cache: "no-store"})
+          .then(function(r){return r.json()})
+          .then(function(d){ if (d.state !== "pending") location.reload(); else setTimeout(poll, 5000); })
+          .catch(function(){ setTimeout(poll, 8000); });
+      })();
+      document.querySelectorAll(".copy").forEach(function(b){
+        b.addEventListener("click", function(){
+          var t=b.dataset.copy, done=function(){ b.textContent="Copied"; setTimeout(function(){b.textContent="Copy"},1500); };
+          if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done); else done();
+        });
+      });
+    </script>
+  {% endif %}
+  </div>
+  <a class="back" href="{{ url_for('index') }}">Back to all titles</a>
+</div>
+{% endblock %}
