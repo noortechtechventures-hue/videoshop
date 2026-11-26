@@ -35,6 +35,8 @@ button{font:inherit}
 .btn.full{display:flex;width:100%;padding:15px 22px}
 .btn.dark{background:var(--cream-ink);color:var(--cream)}
 .btn.wa{background:#25D366;color:#06210f}
+#sWa .lead{margin:0 0 8px;font-weight:600;color:var(--cream-ink)}
+#sWaBtns{display:grid;gap:8px}
 
 /* hero */
 .hero{position:relative;margin-top:-58px;min-height:min(78vh,540px);display:flex;align-items:flex-end;overflow:hidden;isolation:isolate}
@@ -166,7 +168,10 @@ dialog::backdrop{background:rgba(8,5,16,.78);backdrop-filter:blur(3px)}
       <li>Enter the till number and the amount</li>
       <li>Send us your M-Pesa message to get your download link</li>
     </ol>
-    <a class="btn wa full" id="sWa" target="_blank" rel="noopener" hidden>I have paid, send message on WhatsApp</a>
+    <div id="sWa" hidden>
+      <p class="lead">I have paid. Send the message on WhatsApp:</p>
+      <div id="sWaBtns"></div>
+    </div>
     <p class="note" id="sNote" hidden>After you pay, send your M-Pesa message to the seller. You will get your download link once the payment is confirmed.</p>
   </div>
 </dialog>
@@ -178,7 +183,9 @@ dialog::backdrop{background:rgba(8,5,16,.78);backdrop-filter:blur(3px)}
 const SETTINGS = {
   siteName: "My Videos",
   till: "5196055",          // your till number (change to your brother's later)
-  whatsapp: "",             // seller WhatsApp in this form: 254712345678  (leave empty to hide the button)
+  // WhatsApp numbers that receive the "I have paid" message, in this form: 254712345678
+  // One button is shown per number. Leave the list empty to hide the buttons.
+  whatsapp: ["254769661924", "254708838468"],
 };
 
 /* One line per video. Fields:
@@ -277,12 +284,19 @@ const VIDEOS = [
     $("sPrice").textContent = "KSh " + v.price;
     $("sTill").textContent = SETTINGS.till;
     $("sAmt").textContent = "KSh " + v.price;
-    var wa = $("sWa"), num = String(SETTINGS.whatsapp || "").replace(/\D/g, "");
-    if (num) {
+    var nums = [].concat(SETTINGS.whatsapp || []).map(function (n) { return String(n).replace(/\D/g, ""); }).filter(Boolean);
+    var box = $("sWaBtns"); box.replaceChildren();
+    if (nums.length) {
       var msg = 'Hello, I have paid KSh ' + v.price + ' to till ' + SETTINGS.till + ' for "' + v.title + '". My M-Pesa number is: ';
-      wa.href = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
-      wa.hidden = false; $("sNote").hidden = true;
-    } else { wa.hidden = true; $("sNote").hidden = false; }
+      nums.forEach(function (num) {
+        var local = num.indexOf("254") === 0 ? "0" + num.slice(3) : num;
+        var a = el("a", "btn wa full", "WhatsApp " + local.replace(/^(\d{4})(\d{3})(\d{3})$/, "$1 $2 $3"));
+        a.href = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
+        a.target = "_blank"; a.rel = "noopener";
+        box.appendChild(a);
+      });
+      $("sWa").hidden = false; $("sNote").hidden = true;
+    } else { $("sWa").hidden = true; $("sNote").hidden = false; }
     sheet.showModal();
   }
   $("sClose").onclick = function () { sheet.close(); };
