@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Seller page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+:root{--ink:#120E1C;--velvet:#1B1530;--line:#34294f;--text:#F4EFFA;--muted:#A99FBF;--gold:#F4B942;--gold-ink:#2B1A00;--ok:#3DDC97;--bad:#ff7b84;
+--display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--text);font:400 1rem/1.5 var(--body)}
+main{max-width:640px;margin:0 auto;padding:18px 16px 60px}
+h1{font:800 2.2rem/1 var(--display);margin:6px 0 4px}
+h2{font:700 1.4rem/1.1 var(--display);margin:0 0 6px}
+.muted{color:var(--muted);font-size:.95rem;margin:.2em 0 .8em}
+.panel{background:var(--velvet);border:1px solid var(--line);border-radius:16px;padding:16px;margin:16px 0}
+label{display:block;margin-top:12px;font-size:.92rem;color:var(--muted);font-weight:500}
+input,textarea{display:block;width:100%;margin-top:6px;padding:12px 14px;background:var(--ink);color:var(--text);border:1.5px solid var(--line);border-radius:12px;font:inherit}
+textarea{min-height:110px;resize:vertical}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;margin-top:12px;border:0;border-radius:999px;padding:14px 20px;background:var(--gold);color:var(--gold-ink);font:700 1.05rem/1 var(--body);text-decoration:none;cursor:pointer}
+.btn.wa{background:#25D366;color:#06210f}
+.btn.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+.found{display:grid;gap:6px;margin-top:12px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.found div{display:flex;justify-content:space-between;gap:12px}
+.found span:first-child{color:var(--muted)}
+.found strong{text-align:right;word-break:break-word}
+.good{color:var(--ok)}.warn{color:var(--bad)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding:10px 0}
+.item:first-of-type{border-top:0}
+.item small{display:block;color:var(--muted);word-break:break-all}
+.x{background:none;border:0;color:var(--bad);font:600 .9rem var(--body);cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+  <h1>Seller page</h1>
+  <p class="muted">For you only. Your links are saved in this browser on this phone, not on the website.</p>
+
+  <section class="panel" aria-labelledby="h-reply">
+    <h2 id="h-reply">Reply to a customer</h2>
+    <p class="muted">Paste the WhatsApp message the customer sent you.</p>
+    <label>Customer message
+      <textarea id="msg" placeholder='Hello, I have paid KSh 50 to till 5196055 for "Wedding Highlights". My M-Pesa number is: 0712345678'></textarea>
+    </label>
+    <div class="found" id="found" hidden>
+      <div><span>Video</span><strong id="fTitle"></strong></div>
+      <div><span>Amount</span><strong id="fAmt"></strong></div>
+      <div><span>Customer number</span><strong id="fPhone"></strong></div>
+      <div><span>Download link</span><strong id="fLink"></strong></div>
+    </div>
+    <label id="phoneFix" hidden>Customer number (not found in the message, type it)
+      <input id="phoneIn" inputmode="tel" placeholder="0712 345 678">
+    </label>
+    <p class="muted" id="check" hidden>Before you send: look in your M-Pesa messages. Is there a payment of this amount from this number?</p>
+    <a class="btn wa" id="send" aria-disabled="true" target="_blank" rel="noopener">Open WhatsApp reply</a>
+    <button class="btn ghost" id="copy" type="button">Copy reply text</button>
+  </section>
+
+  <section class="panel" aria-labelledby="h-links">
+    <h2 id="h-links">Your download links</h2>
+    <p class="muted">Add each video once. The title must be the same as on the shop.</p>
+    <div id="list"></div>
+    <label>Video title
+      <input id="newTitle" placeholder="Wedding Highlights" autocomplete="off">
+    </label>
+    <label>Google Drive link
+      <input id="newLink" inputmode="url" placeholder="https://drive.google.com/file/d/..." autocomplete="off">
+    </label>
+    <button class="btn" id="add" type="button">Save link</button>
+    <p class="muted" id="addMsg" role="status"></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = "videoshop_links_v1";
+  function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
+  function save(a) { try { localStorage.setItem(KEY, JSON.stringify(a)); return true; } catch (e) { return false; } }
+  var links = load();
+  function norm(s) { return String(s || "").toLowerCase().replace(/[“”"']/g, "").replace(/\s+/g, " ").trim(); }
+  function phone254(raw) {
+    var d = String(raw || "").replace(/\D/g, "");
+    if (d.indexOf("254") === 0 && d.length === 12) return d;
+    if (d.charAt(0) === "0" && d.length === 10) return "254" + d.slice(1);
+    if (d.length === 9) return "254" + d;
+    return "";
+  }
+  function show(d) { return d ? "0" + d.slice(3) : ""; }
+
+  function renderList() {
+    var box = $("list"); box.replaceChildren();
+    if (!links.length) { var p = document.createElement("p"); p.className = "muted"; p.textContent = "No links saved yet."; box.appendChild(p); }
+    links.forEach(function (it, i) {
+      var row = document.createElement("div"); row.className = "item";
+      var left = document.createElement("div");
+      var b = document.createElement("strong"); b.textContent = it.title;
+      var s = document.createElement("small"); s.textContent = it.link;
+      left.appendChild(b); left.appendChild(s);
+      var x = document.createElement("button"); x.className = "x"; x.type = "button"; x.textContent = "Remove";
+      x.onclick = function () { links.splice(i, 1); save(links); renderList(); parse(); };
+      row.appendChild(left); row.appendChild(x); box.appendChild(row);
+    });
+  }
+
+  $("add").onclick = function () {
+    var t = $("newTitle").value.trim(), l = $("newLink").value.trim(), m = $("addMsg");
+    if (!t || !/^https?:\/\//i.test(l)) { m.textContent = "Enter the title and a link that starts with https://"; return; }
+    var i = links.findIndex(function (x) { return norm(x.title) === norm(t); });
+    if (i > -1) links[i] = { title: t, link: l }; else links.push({ title: t, link: l });
+    m.textContent = save(links) ? "Saved." : "Could not save in this browser. Private mode may block it.";
+    $("newTitle").value = ""; $("newLink").value = ""; renderList(); parse();
+  };
+
+  var reply = "";
+  function parse() {
+    var text = $("msg").value, found = $("found");
+    if (!text.trim()) { found.hidden = true; $("check").hidden = true; $("phoneFix").hidden = true; setSend(""); return; }
+    var t = (text.match(/for\s+["“”](.+?)["“”]/i) || [])[1] || "";
+    var a = (text.match(/KSh\s*([\d,]+)/i) || [])[1] || "";
+    var raw = (text.match(/number\s+is\s*:?\s*([+\d][\d\s+-]*)/i) || [])[1] || "";
+    var ph = phone254(raw) || phone254($("phoneIn").value);
+    var hit = links.find(function (x) { return norm(x.title) === norm(t); });
+    found.hidden = false; $("check").hidden = false;
+    $("fTitle").textContent = t || "Not found";
+    $("fAmt").textContent = a ? "KSh " + a : "Not found";
+    var fp = $("fPhone"); fp.textContent = ph ? show(ph) : "Not found"; fp.className = ph ? "" : "warn";
+    var fl = $("fLink"); fl.textContent = hit ? "Saved" : "Not saved yet"; fl.className = hit ? "good" : "warn";
+    $("phoneFix").hidden = !!phone254(raw);
+    if (t && ph && hit) {
+      reply = 'Payment received, thank you! Download "' + hit.title + '" here: ' + hit.link;
+      setSend("https://wa.me/" + ph + "?text=" + encodeURIComponent(reply));
+    } else { reply = ""; setSend(""); }
+  }
+  function setSend(href) {
+    var s = $("send");
+    if (href) { s.href = href; s.setAttribute("aria-disabled", "false"); }
+    else { s.removeAttribute("href"); s.setAttribute("aria-disabled", "true"); }
+  }
+  $("msg").addEventListener("input", parse);
+  $("phoneIn").addEventListener("input", parse);
+  $("copy").onclick = function () {
+    var b = this; if (!reply) { b.textContent = "Fill the message and save the link first"; setTimeout(function () { b.textContent = "Copy reply text"; }, 2000); return; }
+    var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy reply text"; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(reply).then(done, done); else done();
+  };
+  renderList();
+})();
+</script>
+</body>
+</html>
