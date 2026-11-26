@@ -3,7 +3,7 @@
 {% block body %}
 <div class="pass bare">
   <div class="pass-top">
-    {% if o.thumb %}<img src="{{ url_for('thumb', name=o.thumb) }}" alt="">{% else %}<div class="noimg">{{ o.title[:1] }}</div>{% endif %}
+    {% if o.thumb %}<img src="{{ url_for('thumb', name=o.thumb) }}" alt="">{% else %}<div class="cv p{{ o.video_id % 8 }} mini-cv"></div>{% endif %}
     <div>
       <h1>{{ o.title }}</h1>
       <p class="muted">{{ o.kind|capitalize }} · {{ o.size|size }}</p>

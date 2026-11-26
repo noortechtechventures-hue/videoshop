@@ -62,7 +62,6 @@ form.inline{display:inline}
 /* ---------- hero ---------- */
 .hero{position:relative;margin:-58px 0 0;min-height:min(78vh,560px);display:flex;align-items:flex-end;overflow:hidden;isolation:isolate}
 .hero>img,.hero .fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
-.hero .fallback{background:radial-gradient(120% 90% at 80% 10%,#4b2a7a 0,#1B1530 55%,#120E1C 100%)}
 .hero::after{content:"";position:absolute;inset:0;z-index:-1;
   background:linear-gradient(0deg,var(--ink) 4%,rgba(18,14,28,.78) 38%,rgba(18,14,28,.25) 75%,rgba(18,14,28,.55) 100%)}
 .hero-body{width:100%;max-width:1180px;margin:0 auto;padding:0 16px 30px}
@@ -175,3 +174,34 @@ input[type=file]{padding:10px}
 .tag.rejected{color:#ff7b84;border-color:#ff7b84}
 .ok{background:rgba(61,220,151,.12);border:1px solid var(--ok);padding:12px;border-radius:12px}
 .bad{background:rgba(194,48,58,.15);border:1px solid var(--curtain);padding:12px;border-radius:12px;margin-bottom:10px}
+
+@media(max-width:520px){nav{gap:11px;font-size:.88rem}.brand{font-size:1.2rem;gap:7px}.brand .mark{width:24px;height:24px;border-radius:6px}.brand .mark svg{width:10px;height:10px}.top{padding:10px 12px}}
+
+/* ---------- generated cover art (no picture needed) ---------- */
+.cv{position:relative;overflow:hidden;isolation:isolate;background-color:#120E1C}
+.art.cv{position:absolute;inset:0}
+.cv::before{content:"";position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(circle at 74% 24%,transparent 0 21%,rgba(255,255,255,.17) 21.4% 22.2%,transparent 22.6% 33%,rgba(255,255,255,.08) 33.3% 33.9%,transparent 34.3%),
+    linear-gradient(118deg,transparent 36%,rgba(255,255,255,.13) 48%,transparent 60%)}
+.cv::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:overlay;opacity:.65;background-size:160px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cv-title{position:absolute;left:14px;right:14px;bottom:42px;z-index:2;font-family:var(--display);font-weight:800;font-size:clamp(1.55rem,6.6vw,2.3rem);line-height:.95;color:#fff;text-wrap:balance;text-shadow:0 2px 18px rgba(0,0,0,.55)}
+.cv-title::before{content:"";display:block;width:30px;height:2px;background:var(--gold);margin-bottom:10px}
+.poster.gen::after{background:linear-gradient(0deg,rgba(0,0,0,.5) 0,rgba(0,0,0,0) 26%)}
+.poster.gen{box-shadow:0 10px 24px rgba(0,0,0,.35),inset 0 0 0 1px rgba(244,185,66,.28)}
+.poster.gen .cap h3{display:none}
+.poster.gen .cap{padding-top:0}
+.p0{background-image:radial-gradient(90% 60% at 82% 0%,#f9d27a,transparent 62%),radial-gradient(80% 70% at 0% 100%,#8a1c2b,transparent 64%),linear-gradient(165deg,#2b1b0c,#0b0710)}
+.p1{background-image:radial-gradient(90% 60% at 80% 0%,#4fd1e6,transparent 62%),radial-gradient(80% 70% at 5% 100%,#3b2bb8,transparent 64%),linear-gradient(165deg,#0b1b33,#070812)}
+.p2{background-image:radial-gradient(90% 60% at 80% 0%,#ff7a7a,transparent 62%),radial-gradient(80% 70% at 0% 100%,#7a0f26,transparent 64%),linear-gradient(165deg,#2a0b17,#0a0610)}
+.p3{background-image:radial-gradient(90% 60% at 80% 0%,#7bf0b4,transparent 62%),radial-gradient(80% 70% at 0% 100%,#0d6b52,transparent 64%),linear-gradient(165deg,#07241d,#050b0b)}
+.p4{background-image:radial-gradient(90% 60% at 80% 0%,#d9a0ff,transparent 62%),radial-gradient(80% 70% at 0% 100%,#5a22b8,transparent 64%),linear-gradient(165deg,#1d0f3a,#09050f)}
+.p5{background-image:radial-gradient(90% 60% at 80% 0%,#ffcf6b,transparent 60%),radial-gradient(80% 70% at 0% 100%,#d6336c,transparent 64%),linear-gradient(165deg,#3a1450,#0e0716)}
+.p6{background-image:radial-gradient(90% 60% at 80% 0%,#9fd8ff,transparent 62%),radial-gradient(80% 70% at 0% 100%,#0e7490,transparent 64%),linear-gradient(165deg,#062a3a,#04090e)}
+.p7{background-image:radial-gradient(90% 55% at 82% 0%,#e6c27a,transparent 60%),radial-gradient(80% 70% at 0% 100%,#3a3a4a,transparent 64%),linear-gradient(165deg,#15121c,#050408)}
+.wm{font-family:var(--display);font-weight:800;letter-spacing:.01em}
+.wm b{font-weight:800;color:var(--gold)}
+
+.mini-cv{width:72px;aspect-ratio:2/3;border-radius:8px;flex:none}
+.pass-top .mini-cv::before{opacity:.5}

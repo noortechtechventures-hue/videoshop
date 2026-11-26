@@ -7,7 +7,7 @@
   {% if video.thumb %}<div class="bg" style="background-image:url('{{ url_for('thumb', name=video.thumb) }}')"></div>{% endif %}
   <div class="detail-in">
     <div class="poster">
-      {% if video.thumb %}<img src="{{ url_for('thumb', name=video.thumb) }}" alt="">{% else %}<div class="noimg">{{ video.title[:1] }}</div>{% endif %}
+      {% if video.thumb %}<img src="{{ url_for('thumb', name=video.thumb) }}" alt="">{% else %}<div class="cv p{{ video.id % 8 }}" style="position:absolute;inset:0"><span class="cv-title">{{ video.title }}</span></div>{% endif %}
     </div>
     <div>
       <h1>{{ video.title }}</h1>

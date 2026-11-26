@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Client jobs</h1>
+<p class="muted">For your own videography work. Add the finished video's Google Drive link, then send the client their private page. The download link only appears there after you mark the job as paid.</p>
+
+<div class="panel">
+  <h2>New job</h2>
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Title <input name="title" required maxlength="100" placeholder="Wanjiku and Otieno Wedding"></label>
+    <div class="two">
+      <label>Client name <input name="client" maxlength="60" placeholder="Wanjiku"></label>
+      <label>Price (KSh) <input name="price" type="number" min="1" required value="1000"></label>
+    </div>
+    <label>Google Drive link (Share, then Anyone with the link)
+      <input name="link" inputmode="url" required placeholder="https://drive.google.com/file/d/...">
+    </label>
+    <button class="btn full">Create client link</button>
+  </form>
+</div>
+
+<h2>Jobs ({{ jobs|length }})</h2>
+{% if not jobs %}<p class="muted">No jobs yet.</p>{% endif %}
+{% for j in jobs %}
+{% set url = base ~ url_for('job_page', token=j.token) %}
+<div class="panel">
+  <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+    <div><strong>{{ j.title }}</strong><br>
+      <span class="muted">{% if j.client %}{{ j.client }} · {% endif %}KSh {{ j.price }}{% if j.phone %} · paid from {{ j.phone|phone }}{% endif %}</span></div>
+    <span class="tag {{ 'approved' if j.status=='paid' else '' }}">{{ {'unpaid':'Not paid','waiting':'Says paid','paid':'Paid'}[j.status] }}</span>
+  </div>
+  {% if j.status == 'waiting' %}
+    <p class="muted" style="color:var(--gold)">The client says they paid. Check your M-Pesa for KSh {{ j.price }} from {{ j.phone|phone }}, then mark it paid.</p>
+  {% endif %}
+  <label>Client link
+    <input readonly value="{{ url }}" onfocus="this.select()">
+  </label>
+  <div class="actions" style="flex-wrap:wrap;margin-top:10px">
+    <button class="btn small ghost" type="button" data-copy="{{ url }}">Copy link</button>
+    <a class="btn small ghost" target="_blank" rel="noopener"
+       href="https://wa.me/{{ j.phone if j.phone else '' }}?text={{ ('Hello' ~ (' ' ~ j.client if j.client else '') ~ ', your video “' ~ j.title ~ '” is ready. Pay KSh ' ~ j.price ~ ' to till ' ~ till ~ ' and download it here: ' ~ url)|urlencode }}">Send on WhatsApp</a>
+    {% if j.status != 'paid' %}
+    <form method="post" action="{{ url_for('admin_job_action', jid=j.id, action='paid') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small">Mark as paid</button></form>
+    {% else %}
+    <form method="post" action="{{ url_for('admin_job_action', jid=j.id, action='lock') }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small ghost">Lock again</button></form>
+    {% endif %}
+    <form method="post" action="{{ url_for('admin_job_action', jid=j.id, action='delete') }}"
+          onsubmit="return confirm('Delete this job?')">
+      <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small ghost">Delete</button></form>
+  </div>
+</div>
+{% endfor %}
+<script>
+document.querySelectorAll("[data-copy]").forEach(function(b){
+  b.addEventListener("click", function(){
+    var t=b.dataset.copy, done=function(){ var o=b.textContent; b.textContent="Copied"; setTimeout(function(){b.textContent=o},1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done); else done();
+  });
+});
+</script>
+{% endblock %}

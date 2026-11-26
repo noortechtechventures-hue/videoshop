@@ -13,11 +13,12 @@
 <body>
 <header class="top">
   <a class="brand" href="{{ url_for('index') }}">
-    <span class="mark"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg></span>{{ site_name }}
+    <span class="mark"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg></span><span class="wm">{% if site_name == 'VillageFlix' %}Village<b>Flix</b>{% else %}{{ site_name }}{% endif %}</span>
   </a>
   {% if is_admin %}
   <nav>
     <a href="{{ url_for('admin_orders') }}">Payments</a>
+    <a href="{{ url_for('admin_jobs') }}">Client jobs</a>
     <a href="{{ url_for('admin_videos') }}">Videos</a>
     <form method="post" action="{{ url_for('admin_logout') }}" class="inline">
       <input type="hidden" name="csrf" value="{{ csrf }}">

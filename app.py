@@ -28,7 +28,7 @@ THUMBS = DATA / "thumbs"
 DB_PATH = DATA / "site.db"
 
 TILL = os.environ.get("TILL_NUMBER", "5196055")
-SITE_NAME = os.environ.get("SITE_NAME", "My Videos")
+SITE_NAME = os.environ.get("SITE_NAME", "VillageFlix")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 LINK_HOURS = int(os.environ.get("LINK_HOURS", "72"))  # how long a paid download stays open
 MAX_UPLOAD_GB = float(os.environ.get("MAX_UPLOAD_GB", "4"))
@@ -91,6 +91,19 @@ def init_db():
             created REAL NOT NULL,
             approved_at REAL,
             FOREIGN KEY (video_id) REFERENCES videos(id)
+        );
+        CREATE TABLE IF NOT EXISTS jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            token TEXT NOT NULL UNIQUE,
+            ref TEXT NOT NULL,
+            title TEXT NOT NULL,
+            client TEXT,
+            price INTEGER NOT NULL,
+            link TEXT NOT NULL,
+            phone TEXT,
+            status TEXT NOT NULL DEFAULT 'unpaid',
+            created REAL NOT NULL,
+            paid_at REAL
         );
         """
     )
@@ -366,6 +379,95 @@ def admin_video_delete(vid):
         db().execute("DELETE FROM videos WHERE id=?", (vid,))
         db().commit()
     return redirect(url_for("admin_videos"))
+
+
+# ---------- client jobs: private pay-then-link pages ----------
+def drive_direct(link):
+    """Turn a Google Drive 'file/d/ID/view' link into a direct-download link. Other links pass through."""
+    if "drive.google.com" in link:
+        m = re.search(r"/file/d/([\w-]+)", link) or re.search(r"[?&]id=([\w-]+)", link)
+        if m:
+            return f"https://drive.google.com/uc?export=download&id={m.group(1)}"
+    return link
+
+
+def load_job(token):
+    j = db().execute("SELECT * FROM jobs WHERE token=?", (token,)).fetchone()
+    if not j:
+        abort(404)
+    return j
+
+
+@app.route("/j/<token>", methods=["GET", "POST"])
+def job_page(token):
+    j = load_job(token)
+    if request.method == "POST" and j["status"] == "unpaid":
+        phone = norm_phone(request.form.get("phone"))
+        if not phone:
+            flash("Enter the M-Pesa number you paid from, e.g. 0712345678.")
+            return render_template("job.html", j=j), 400
+        db().execute("UPDATE jobs SET status='waiting', phone=? WHERE id=?", (phone, j["id"]))
+        db().commit()
+        return redirect(url_for("job_page", token=token))
+    resp = app.make_response(render_template("job.html", j=j))
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@app.route("/j/<token>/status")
+def job_status(token):
+    return jsonify(state=load_job(token)["status"])
+
+
+@app.route("/j/<token>/get")
+def job_get(token):
+    j = load_job(token)
+    if j["status"] != "paid":
+        abort(403)
+    resp = redirect(drive_direct(j["link"]))
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@app.route("/admin/jobs", methods=["GET", "POST"])
+@admin_required
+def admin_jobs():
+    if request.method == "POST":
+        title = (request.form.get("title") or "").strip()[:100]
+        client = (request.form.get("client") or "").strip()[:60]
+        link = (request.form.get("link") or "").strip()
+        try:
+            price = int(request.form.get("price", ""))
+            assert 1 <= price <= 1000000
+        except (ValueError, AssertionError):
+            flash("Price must be a whole number of shillings.")
+            return redirect(url_for("admin_jobs"))
+        if not title or not re.match(r"^https?://", link, re.I):
+            flash("Enter a title and a download link that starts with https://")
+            return redirect(url_for("admin_jobs"))
+        db().execute(
+            "INSERT INTO jobs (token, ref, title, client, price, link, created) VALUES (?,?,?,?,?,?,?)",
+            (secrets.token_urlsafe(12), new_ref(), title, client, price, link, time.time()))
+        db().commit()
+        flash("Job created. Copy the client link below and send it to your client.")
+        return redirect(url_for("admin_jobs"))
+    jobs = db().execute("SELECT * FROM jobs ORDER BY CASE status WHEN 'waiting' THEN 0 WHEN 'unpaid' THEN 1 ELSE 2 END, created DESC").fetchall()
+    return render_template("admin_jobs.html", jobs=jobs, base=request.host_url.rstrip("/"))
+
+
+@app.route("/admin/job/<int:jid>/<action>", methods=["POST"])
+@admin_required
+def admin_job_action(jid, action):
+    if action == "paid":
+        db().execute("UPDATE jobs SET status='paid', paid_at=? WHERE id=?", (time.time(), jid))
+    elif action == "lock":
+        db().execute("UPDATE jobs SET status='unpaid', paid_at=NULL WHERE id=?", (jid,))
+    elif action == "delete":
+        db().execute("DELETE FROM jobs WHERE id=?", (jid,))
+    else:
+        abort(404)
+    db().commit()
+    return redirect(url_for("admin_jobs"))
 
 
 @app.errorhandler(413)

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ j.title }} · {{ site_name }}{% endblock %}
+{% block body %}
+<div class="pass bare">
+  <div class="pass-top">
+    <div class="cv p{{ j.id % 8 }} mini-cv"></div>
+    <div>
+      <h1>{{ j.title }}</h1>
+      {% if j.client %}<p class="muted">Prepared for {{ j.client }}</p>{% endif %}
+      <div class="price">KSh {{ j.price }}</div>
+    </div>
+  </div>
+
+  <div class="pass-bottom">
+  {% if j.status == 'paid' %}
+    <div class="stamp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Payment confirmed. Thank you!</div>
+    <a class="btn gold full big" href="{{ url_for('job_get', token=j.token) }}">Download your video</a>
+    <p class="muted" style="color:#6b5f4c">If the download does not start, tap Download again. Save the file to your phone or computer.</p>
+
+  {% elif j.status == 'waiting' %}
+    <div class="wait" role="status"><span class="dot"></span><span>Thank you. We are confirming your payment. This page updates by itself and your download will appear here.</span></div>
+    <p class="muted" style="color:#6b5f4c;margin-top:10px">Your code: <strong>{{ j.ref }}</strong></p>
+    <script>
+      (function poll() {
+        fetch("{{ url_for('job_status', token=j.token) }}", {cache: "no-store"})
+          .then(function(r){return r.json()})
+          .then(function(d){ if (d.state !== "waiting") location.reload(); else setTimeout(poll, 5000); })
+          .catch(function(){ setTimeout(poll, 8000); });
+      })();
+    </script>
+
+  {% else %}
+    <div class="pay-rows">
+      <div class="pay-row"><div><small>Till number</small><strong>{{ till }}</strong></div>
+        <button class="copy" type="button" data-copy="{{ till }}">Copy</button></div>
+      <div class="pay-row"><div><small>Amount</small><strong>KSh {{ j.price }}</strong></div>
+        <button class="copy" type="button" data-copy="{{ j.price }}">Copy</button></div>
+    </div>
+    <ol class="steps">
+      <li>Open M-Pesa, then Lipa na M-Pesa, then Buy Goods and Services</li>
+      <li>Enter the till number and the amount</li>
+      <li>Come back here and tell us the number you paid from</li>
+    </ol>
+    {% with msgs = get_flashed_messages() %}{% for m in msgs %}<p class="bad" role="alert">{{ m }}</p>{% endfor %}{% endwith %}
+    <form method="post">
+      <label style="color:#6b5f4c">M-Pesa number you paid from
+        <input name="phone" inputmode="tel" placeholder="0712 345 678" required autocomplete="tel"
+               style="background:#fff8e6;color:#2A2118;border-color:#c9a24a">
+      </label>
+      <button class="btn gold full">I have paid</button>
+    </form>
+    <script>
+      document.querySelectorAll(".copy").forEach(function(b){
+        b.addEventListener("click", function(){
+          var t=b.dataset.copy, done=function(){ b.textContent="Copied"; setTimeout(function(){b.textContent="Copy"},1500); };
+          if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done); else done();
+        });
+      });
+    </script>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}
