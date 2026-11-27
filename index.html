@@ -1,80 +1,335 @@
-{% extends "base.html" %}
-{% block hero %}
-{% if videos %}
-{% set f = videos[0] %}
-<section class="hero">
-  {% if f.thumb %}<img src="{{ url_for('thumb', name=f.thumb) }}" alt="">{% else %}<div class="fallback cv p{{ f.id % 8 }}"></div>{% endif %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#120E1C">
+<title>VillageFlix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+:root{--ink:#120E1C;--velvet:#1B1530;--velvet-2:#271E42;--line:#34294f;--text:#F4EFFA;--muted:#A99FBF;--gold:#F4B942;--gold-ink:#2B1A00;--cream:#F5EBD3;--cream-ink:#2A2118;--curtain:#C2303A;
+--display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;--body:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--text);font:400 1rem/1.5 var(--body);min-height:100vh}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:6px}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.02;margin:0}
+button{font:inherit}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:10px;padding:12px 16px;position:sticky;top:0;z-index:20;background:linear-gradient(var(--ink) 55%,rgba(18,14,28,0))}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.55rem}
+.mark{width:30px;height:30px;border-radius:8px;background:var(--gold);display:grid;place-items:center}
+.mark svg{width:14px;height:14px;fill:var(--gold-ink);margin-left:2px}
+
+/* price ticket */
+.tt{display:inline-block;background:var(--cream);color:var(--cream-ink);font-family:var(--display);font-weight:800;font-size:.95rem;line-height:1;padding:7px 14px;letter-spacing:.02em;
+ -webkit-mask:radial-gradient(circle 5px at 0 50%,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 5px at 100% 50%,#0000 97%,#000) right/51% 100% no-repeat;
+ mask:radial-gradient(circle 5px at 0 50%,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 5px at 100% 50%,#0000 97%,#000) right/51% 100% no-repeat}
+.tt.lg{font-size:1.5rem;padding:10px 20px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--gold-ink);border:0;border-radius:999px;padding:12px 22px;font:700 1.05rem/1 var(--body);text-decoration:none;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn.big{padding:16px 30px;font-size:1.15rem}
+.btn.full{display:flex;width:100%;padding:15px 22px}
+.btn.dark{background:var(--cream-ink);color:var(--cream)}
+.btn.wa{background:#25D366;color:#06210f}
+#sWa .lead{margin:0 0 8px;font-weight:600;color:var(--cream-ink)}
+#sWaBtns{display:grid;gap:8px}
+
+/* hero */
+.hero{position:relative;margin-top:-58px;min-height:min(78vh,540px);display:flex;align-items:flex-end;overflow:hidden;isolation:isolate}
+.hero .bg{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,var(--ink) 4%,rgba(18,14,28,.78) 38%,rgba(18,14,28,.25) 75%,rgba(18,14,28,.55) 100%)}
+.hero-body{width:100%;max-width:1180px;margin:0 auto;padding:0 16px 30px}
+.hero h1{font-size:clamp(2.7rem,9vw,5.6rem);font-weight:800;max-width:14ch;text-wrap:balance;text-shadow:0 2px 24px rgba(0,0,0,.45)}
+.meta{margin:12px 0 18px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;font-weight:500}
+.kind{background:rgba(255,255,255,.14);padding:3px 12px;border-radius:999px;font-size:.9rem;backdrop-filter:blur(6px)}
+
+main{max-width:1180px;margin:0 auto;padding:0 16px 56px}
+.shelf-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:26px 0 16px}
+.shelf-head h2{font-size:1.7rem}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-width:0}
+.search{position:relative;flex:1 1 220px;min-width:180px}
+.search input{display:block;width:100%;padding:11px 16px 11px 42px;border-radius:999px;background:var(--velvet);color:var(--text);border:1.5px solid transparent;font:inherit}
+.search input::placeholder{color:#7d7397}
+.search svg{position:absolute;left:15px;top:50%;translate:0 -50%;width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:0;background:var(--velvet);color:var(--muted);font:600 .95rem/1 var(--body);padding:10px 16px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--text);color:var(--ink)}
+
+/* posters */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(min-width:620px){.grid{grid-template-columns:repeat(3,1fr);gap:18px}}
+@media(min-width:900px){.grid{grid-template-columns:repeat(4,1fr);gap:22px}}
+@media(min-width:1100px){.grid{grid-template-columns:repeat(5,1fr)}}
+.poster{position:relative;display:block;width:100%;aspect-ratio:2/3;border:0;padding:0;text-align:left;border-radius:12px;overflow:hidden;background:var(--velvet);color:var(--text);cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.35);transition:transform .18s ease,box-shadow .18s ease}
+.poster:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,0,0,.5)}
+.poster[hidden]{display:none}
+.art{position:absolute;inset:0;background-size:cover;background-position:center}
+.poster::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(18,14,28,.95) 0,rgba(18,14,28,.5) 30%,rgba(18,14,28,0) 56%)}
+.poster .tt{position:absolute;top:10px;right:10px;z-index:2}
+.poster .kind{position:absolute;top:10px;left:10px;z-index:2;background:rgba(18,14,28,.72);font-size:.78rem;font-weight:600}
+.poster .cap{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:12px}
+.poster h3{font-size:1.3rem;text-wrap:balance}
+.poster .size{font-size:.82rem;color:var(--muted);margin-top:3px}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.empty strong{display:block;font-family:var(--display);font-size:1.6rem;color:var(--text);margin-bottom:6px}
+
+/* ---------- generated cover art (no picture needed) ---------- */
+.cv{position:relative;overflow:hidden;isolation:isolate;background-color:#120E1C}
+.art.cv{position:absolute;inset:0}
+.cv::before{content:"";position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(circle at 74% 24%,transparent 0 21%,rgba(255,255,255,.17) 21.4% 22.2%,transparent 22.6% 33%,rgba(255,255,255,.08) 33.3% 33.9%,transparent 34.3%),
+    linear-gradient(118deg,transparent 36%,rgba(255,255,255,.13) 48%,transparent 60%)}
+.cv::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;mix-blend-mode:overlay;opacity:.65;background-size:160px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cv-title{position:absolute;left:14px;right:14px;bottom:42px;z-index:2;font-family:var(--display);font-weight:800;font-size:clamp(1.55rem,6.6vw,2.3rem);line-height:.95;color:#fff;text-wrap:balance;text-shadow:0 2px 18px rgba(0,0,0,.55)}
+.cv-title::before{content:"";display:block;width:30px;height:2px;background:var(--gold);margin-bottom:10px}
+.poster.gen::after{background:linear-gradient(0deg,rgba(0,0,0,.5) 0,rgba(0,0,0,0) 26%)}
+.poster.gen{box-shadow:0 10px 24px rgba(0,0,0,.35),inset 0 0 0 1px rgba(244,185,66,.28)}
+.poster.gen .cap h3{display:none}
+.poster.gen .cap{padding-top:0}
+.p0{background-image:radial-gradient(90% 60% at 82% 0%,#f9d27a,transparent 62%),radial-gradient(80% 70% at 0% 100%,#8a1c2b,transparent 64%),linear-gradient(165deg,#2b1b0c,#0b0710)}
+.p1{background-image:radial-gradient(90% 60% at 80% 0%,#4fd1e6,transparent 62%),radial-gradient(80% 70% at 5% 100%,#3b2bb8,transparent 64%),linear-gradient(165deg,#0b1b33,#070812)}
+.p2{background-image:radial-gradient(90% 60% at 80% 0%,#ff7a7a,transparent 62%),radial-gradient(80% 70% at 0% 100%,#7a0f26,transparent 64%),linear-gradient(165deg,#2a0b17,#0a0610)}
+.p3{background-image:radial-gradient(90% 60% at 80% 0%,#7bf0b4,transparent 62%),radial-gradient(80% 70% at 0% 100%,#0d6b52,transparent 64%),linear-gradient(165deg,#07241d,#050b0b)}
+.p4{background-image:radial-gradient(90% 60% at 80% 0%,#d9a0ff,transparent 62%),radial-gradient(80% 70% at 0% 100%,#5a22b8,transparent 64%),linear-gradient(165deg,#1d0f3a,#09050f)}
+.p5{background-image:radial-gradient(90% 60% at 80% 0%,#ffcf6b,transparent 60%),radial-gradient(80% 70% at 0% 100%,#d6336c,transparent 64%),linear-gradient(165deg,#3a1450,#0e0716)}
+.p6{background-image:radial-gradient(90% 60% at 80% 0%,#9fd8ff,transparent 62%),radial-gradient(80% 70% at 0% 100%,#0e7490,transparent 64%),linear-gradient(165deg,#062a3a,#04090e)}
+.p7{background-image:radial-gradient(90% 55% at 82% 0%,#e6c27a,transparent 60%),radial-gradient(80% 70% at 0% 100%,#3a3a4a,transparent 64%),linear-gradient(165deg,#15121c,#050408)}
+.wm{font-family:var(--display);font-weight:800;letter-spacing:.01em}
+.wm b{font-weight:800;color:var(--gold)}
+
+
+/* payment sheet */
+dialog{border:0;padding:0;background:transparent;color:var(--cream-ink);width:min(460px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;margin:auto}
+dialog::backdrop{background:rgba(8,5,16,.78);backdrop-filter:blur(3px)}
+.pass-top,.pass-bottom{background:var(--cream);padding:20px}
+.pass-top{border-radius:18px 18px 0 0;display:flex;gap:16px;align-items:center;position:relative;
+ -webkit-mask:radial-gradient(circle 12px at 0 100%,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% 100%,#0000 97%,#000) right/51% 100% no-repeat;
+ mask:radial-gradient(circle 12px at 0 100%,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% 100%,#0000 97%,#000) right/51% 100% no-repeat}
+.pass-bottom{border-radius:0 0 18px 18px;
+ -webkit-mask:radial-gradient(circle 12px at 0 0,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% 0,#0000 97%,#000) right/51% 100% no-repeat;
+ mask:radial-gradient(circle 12px at 0 0,#0000 97%,#000) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% 0,#0000 97%,#000) right/51% 100% no-repeat;
+ background-image:linear-gradient(90deg,#b9ad92 50%,transparent 0);background-size:12px 2px;background-repeat:repeat-x;background-position:12px 0}
+.mini{width:72px;aspect-ratio:2/3;border-radius:8px;flex:none;position:relative;overflow:hidden}
+.pass-top h2{font-size:2rem;color:var(--cream-ink)}
+.pass-top p{margin:.2em 0;color:#6b5f4c;font-size:.95rem}
+.price{font-family:var(--display);font-weight:800;font-size:1.7rem;margin-top:6px}
+.x{position:absolute;top:8px;right:14px;border:0;background:none;font-size:1.6rem;line-height:1;color:#6b5f4c;cursor:pointer;padding:4px 8px}
+.rows{display:grid;gap:10px;margin:0 0 6px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff8e6;border:2px dashed #c9a24a;border-radius:12px;padding:10px 14px}
+.row small{display:block;color:#6b5f4c;font-size:.82rem;font-weight:500}
+.row strong{font-family:var(--display);font-size:2rem;font-weight:800;letter-spacing:.06em;line-height:1.05}
+.copy{border:0;background:var(--cream-ink);color:var(--cream);font:700 .85rem/1 var(--body);padding:9px 13px;border-radius:999px;cursor:pointer}
+.steps{margin:14px 0 14px;padding-left:20px;color:#4a4033}
+.steps li{margin:5px 0}
+.note{margin:12px 0 0;color:#6b5f4c;font-size:.9rem}
+@media(prefers-reduced-motion:reduce){.poster,.btn{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mark"><svg viewBox="0 0 10 12" aria-hidden="true"><path d="M0 0l10 6-10 6z"/></svg></span><span class="wm" id="siteName">Village<b>Flix</b></span></div>
+</header>
+
+<section class="hero" id="hero" hidden>
+  <div class="bg" id="heroBg"></div>
   <div class="hero-body">
-    <h1>{{ f.title }}</h1>
-    <div class="meta">
-      <span class="kind">{{ f.kind|capitalize }}</span>
-      <span>{{ f.size|size }}</span>
-    </div>
-    <div class="cta">
-      <a class="btn big" href="{{ url_for('get_video', vid=f.id) }}">Download for KSh {{ f.price }}</a>
-    </div>
+    <h1 id="heroTitle"></h1>
+    <div class="meta"><span class="kind" id="heroKind"></span><span id="heroSize"></span></div>
+    <button class="btn big" id="heroBtn"></button>
   </div>
 </section>
-{% endif %}
-{% endblock %}
-{% block body %}
-{% if videos %}
-<div class="shelf-head">
-  <h2>All titles</h2>
-  <div class="tools">
-    <label class="search" style="margin:0">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input id="q" type="search" placeholder="Search titles" aria-label="Search titles" autocomplete="off">
-    </label>
-    <div class="chips" id="chips" role="group" aria-label="Filter by type">
-      <button class="chip" data-kind="all" aria-pressed="true">All</button>
-      <button class="chip" data-kind="movie" aria-pressed="false">Movies</button>
-      <button class="chip" data-kind="series" aria-pressed="false">Series</button>
-      <button class="chip" data-kind="video" aria-pressed="false">Videos</button>
+
+<main>
+  <div class="shelf-head">
+    <h2>All titles</h2>
+    <div class="tools">
+      <label class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="q" type="search" placeholder="Search titles" aria-label="Search titles" autocomplete="off">
+      </label>
+      <div class="chips" id="chips" role="group" aria-label="Filter by type">
+        <button class="chip" data-kind="all" aria-pressed="true">All</button>
+        <button class="chip" data-kind="movie" aria-pressed="false">Movies</button>
+        <button class="chip" data-kind="series" aria-pressed="false">Series</button>
+        <button class="chip" data-kind="video" aria-pressed="false">Videos</button>
+      </div>
     </div>
   </div>
-</div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="none" hidden><strong>No titles match</strong>Try a different word or choose All.</div>
+</main>
 
-<div class="grid" id="grid">
-{% for v in videos %}
-  <a class="poster{% if not v.thumb %} gen{% endif %}" href="{{ url_for('get_video', vid=v.id) }}" data-kind="{{ v.kind }}" data-title="{{ v.title|lower }}">
-    {% if v.thumb %}<img src="{{ url_for('thumb', name=v.thumb) }}" alt="" loading="lazy">{% else %}<div class="cv p{{ v.id % 8 }}" style="position:absolute;inset:0"><span class="cv-title">{{ v.title }}</span></div>{% endif %}
-    <span class="kind">{{ v.kind|capitalize }}</span>
-    <span class="ticket-tag">KSh {{ v.price }}</span>
-    <div class="cap">
-      <h3>{{ v.title }}</h3>
-      <div class="size">{{ v.size|size }}</div>
+<dialog id="sheet" aria-labelledby="sTitle">
+  <div class="pass-top">
+    <div class="mini" id="sArt"></div>
+    <div>
+      <h2 id="sTitle"></h2>
+      <p id="sMeta"></p>
+      <div class="price" id="sPrice"></div>
     </div>
-  </a>
-{% endfor %}
-</div>
-<div class="empty" id="none" hidden><strong>No titles match</strong>Try a different word or choose All.</div>
+    <button class="x" id="sClose" aria-label="Close">&times;</button>
+  </div>
+  <div class="pass-bottom">
+    <div class="rows">
+      <div class="row"><div><small>Till number</small><strong id="sTill"></strong></div><button class="copy" data-copy="till">Copy</button></div>
+      <div class="row"><div><small>Amount</small><strong id="sAmt"></strong></div><button class="copy" data-copy="amt">Copy</button></div>
+    </div>
+    <ol class="steps">
+      <li>Open M-Pesa, then Lipa na M-Pesa, then Buy Goods and Services</li>
+      <li>Enter the till number and the amount</li>
+      <li>Send us your M-Pesa message to get your download link</li>
+    </ol>
+    <div id="sWa" hidden>
+      <p class="lead">I have paid. Send the message on WhatsApp:</p>
+      <div id="sWaBtns"></div>
+    </div>
+    <p class="note" id="sNote" hidden>After you pay, send your M-Pesa message to the seller. You will get your download link once the payment is confirmed.</p>
+  </div>
+</dialog>
 
 <script>
-(function(){
-  var kind="all", grid=document.getElementById("grid"), q=document.getElementById("q"), none=document.getElementById("none");
-  function apply(){
-    var term=q.value.trim().toLowerCase(), shown=0;
-    grid.querySelectorAll(".poster").forEach(function(p){
-      var ok=(kind==="all"||p.dataset.kind===kind)&&(!term||p.dataset.title.indexOf(term)>-1);
-      p.hidden=!ok; if(ok) shown++;
-    });
-    none.hidden=shown>0;
+/* =====================================================================
+   EDIT THIS PART ONLY
+   ===================================================================== */
+const SETTINGS = {
+  siteName: "VillageFlix",
+  till: "5196055",          // your till number (change to your brother's later)
+  // WhatsApp numbers that receive the "I have paid" message, in this form: 254712345678
+  // One button is shown per number. Leave the list empty to hide the buttons.
+  whatsapp: ["254769661924", "254708838468"],
+};
+
+/* One line per video. Fields:
+   title  – name shown on the poster
+   type   – "movie", "series" or "video"
+   price  – number of shillings
+   size   – text such as "1.2 GB" (optional)
+   image  – poster picture, e.g. "images/wedding.jpg" (optional; a tall picture looks best)
+   cover  – if there is no image, a colour style: gold, red, blue, green, violet or sunset
+   NOTE: do NOT put download links here. Anyone can read this page's code.
+         Send the download link to each customer after you confirm their payment.
+   The examples below are samples. Replace them with your own videos. */
+const VIDEOS = [
+  { title: "Wedding Highlights",        type: "video",  price: 50,  size: "850 MB", cover: "gold"   },
+  { title: "Village Football Final",    type: "video",  price: 30,  size: "420 MB", cover: "green"  },
+  { title: "Shamba Stories, Season 1",  type: "series", price: 100, size: "2.4 GB", cover: "sunset" },
+  { title: "Church Choir Night",        type: "video",  price: 30,  size: "610 MB", cover: "violet" },
+  { title: "Safari Run",                type: "movie",  price: 30,  size: "1.1 GB", cover: "red"    },
+  { title: "Pwani Chronicles",          type: "series", price: 100, size: "3.0 GB", cover: "blue"   },
+];
+/* ===================================================================== */
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var kindLabel = { movie: "Movie", series: "Series", video: "Video" };
+  var current = null, kind = "all";
+  document.title = SETTINGS.siteName;
+
+  var PAL = { gold: 0, blue: 1, red: 2, green: 3, violet: 4, sunset: 5, ocean: 6, noir: 7 };
+  function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return h; }
+  function pal(v) { return (v.cover in PAL) ? PAL[v.cover] : hash(v.title) % 8; }
+  function art(v, bare) {
+    var d = document.createElement("div");
+    if (v.image) {
+      d.className = "art"; d.style.backgroundImage = "url('" + encodeURI(v.image) + "')";
+    } else {
+      d.className = "art cv p" + pal(v);
+      if (!bare) { var t = document.createElement("span"); t.className = "cv-title"; t.textContent = v.title; d.appendChild(t); }
+    }
+    return d;
   }
-  document.getElementById("chips").addEventListener("click",function(e){
-    var b=e.target.closest(".chip"); if(!b) return;
-    kind=b.dataset.kind;
-    this.querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",c===b)});
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
+
+  // hero
+  if (VIDEOS.length) {
+    var f = VIDEOS.find(function (v) { return v.featured; }) || VIDEOS[0];
+    $("hero").hidden = false;
+    var bg = $("heroBg");
+    if (f.image) bg.style.backgroundImage = "url('" + encodeURI(f.image) + "')"; else bg.className = "bg cv p" + pal(f);
+    $("heroTitle").textContent = f.title;
+    $("heroKind").textContent = kindLabel[f.type] || "Video";
+    $("heroSize").textContent = f.size || "";
+    $("heroBtn").textContent = "Download for KSh " + f.price;
+    $("heroBtn").onclick = function () { openSheet(f); };
+  }
+
+  // grid
+  var grid = $("grid");
+  if (!VIDEOS.length) {
+    grid.replaceWith(Object.assign(el("div", "empty"), { innerHTML: "<strong>No videos yet</strong>New titles are coming. Check back soon." }));
+  }
+  VIDEOS.forEach(function (v) {
+    var b = el("button", "poster" + (v.image ? "" : " gen")); b.type = "button";
+    b.dataset.kind = v.type; b.dataset.title = v.title.toLowerCase();
+    b.setAttribute("aria-label", v.title + ", KSh " + v.price);
+    b.appendChild(art(v));
+    b.appendChild(el("span", "kind", kindLabel[v.type] || "Video"));
+    b.appendChild(el("span", "tt", "KSh " + v.price));
+    var cap = el("div", "cap"); cap.appendChild(el("h3", "", v.title)); if (v.size) cap.appendChild(el("div", "size", v.size));
+    b.appendChild(cap);
+    b.onclick = function () { openSheet(v); };
+    grid.appendChild(b);
+  });
+
+  // search + filter
+  function apply() {
+    var term = $("q").value.trim().toLowerCase(), shown = 0;
+    grid.querySelectorAll(".poster").forEach(function (p) {
+      var ok = (kind === "all" || p.dataset.kind === kind) && (!term || p.dataset.title.indexOf(term) > -1);
+      p.hidden = !ok; if (ok) shown++;
+    });
+    $("none").hidden = shown > 0 || !VIDEOS.length;
+  }
+  $("chips").addEventListener("click", function (e) {
+    var b = e.target.closest(".chip"); if (!b) return;
+    kind = b.dataset.kind;
+    this.querySelectorAll(".chip").forEach(function (c) { c.setAttribute("aria-pressed", c === b); });
     apply();
   });
-  q.addEventListener("input",apply);
+  $("q").addEventListener("input", apply);
+
+  // payment sheet
+  var sheet = $("sheet");
+  function openSheet(v) {
+    current = v;
+    var a = $("sArt"); a.replaceChildren(art(v, true));
+    $("sTitle").textContent = v.title;
+    $("sMeta").textContent = (kindLabel[v.type] || "Video") + (v.size ? " · " + v.size : "");
+    $("sPrice").textContent = "KSh " + v.price;
+    $("sTill").textContent = SETTINGS.till;
+    $("sAmt").textContent = "KSh " + v.price;
+    var nums = [].concat(SETTINGS.whatsapp || []).map(function (n) { return String(n).replace(/\D/g, ""); }).filter(Boolean);
+    var box = $("sWaBtns"); box.replaceChildren();
+    if (nums.length) {
+      var msg = 'Hello, I have paid KSh ' + v.price + ' to till ' + SETTINGS.till + ' for "' + v.title + '". My M-Pesa number is: ';
+      nums.forEach(function (num) {
+        var local = num.indexOf("254") === 0 ? "0" + num.slice(3) : num;
+        var a = el("a", "btn wa full", "WhatsApp " + local.replace(/^(\d{4})(\d{3})(\d{3})$/, "$1 $2 $3"));
+        a.href = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
+        a.target = "_blank"; a.rel = "noopener";
+        box.appendChild(a);
+      });
+      $("sWa").hidden = false; $("sNote").hidden = true;
+    } else { $("sWa").hidden = true; $("sNote").hidden = false; }
+    sheet.showModal();
+  }
+  $("sClose").onclick = function () { sheet.close(); };
+  sheet.addEventListener("click", function (e) { if (e.target === sheet) sheet.close(); });
+  sheet.querySelectorAll(".copy").forEach(function (b) {
+    b.onclick = function () {
+      var t = b.dataset.copy === "till" ? SETTINGS.till : String(current.price);
+      var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done); else done();
+    };
+  });
 })();
 </script>
-
-{% else %}
-<div class="empty" style="padding-top:90px">
-  <strong>No videos yet</strong>
-  {% if is_admin %}Add your first one under <a href="{{ url_for('admin_videos') }}">Videos</a>.{% else %}New titles are coming. Check back soon.{% endif %}
-</div>
-{% endif %}
-{% endblock %}
+</body>
+</html>
